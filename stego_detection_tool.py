@@ -13,6 +13,45 @@ class colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+# List of required packages
+required_packages = ['steghide', 'exiftool', 'zsteg', 'binwalk', 'foremost', 'pngcheck', 'stegseek']
+
+# Function to check if a package is installed
+def is_package_installed(package):
+    try:
+        subprocess.check_output(['which', package])
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+# Function to install a package
+def install_package(package):
+    try:
+        subprocess.check_call(['sudo', 'apt', 'install', package])
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+# Function to run strings and grep for potential flags
+def run_strings_and_grep(filepath):
+    if not is_package_installed('strings'):
+        print("Package 'strings' is not installed.")
+        install = input("Do you want to install it? (yes/no): ").lower()
+        if install == 'yes':
+            if install_package('strings'):
+                print("Package 'strings' installed successfully.")
+            else:
+                print("Failed to install package 'strings'.")
+        else:
+            print("Aborted.")
+            return
+    try:
+        strings_output = subprocess.check_output(['strings', filepath])
+        grep_output = subprocess.check_output(['grep', '-i', 'CTF'], input=strings_output)
+        return grep_output.decode()
+    except subprocess.CalledProcessError as e:
+        return f"Error: {e.output.decode()}"
+
 # Function to run strings and grep for potential flags
 def run_strings_and_grep(filepath):
     try:
@@ -80,11 +119,23 @@ def run_foremost(filepath):
 
 # Function to run pngcheck
 def run_pngcheck(filepath):
+    if not is_package_installed('pngcheck'):
+        print("Package 'pngcheck' is not installed.")
+        install = input("Do you want to install it? (yes/no): ").lower()
+        if install == 'yes':
+            if install_package('pngcheck'):
+                print("Package 'pngcheck' installed successfully.")
+            else:
+                print("Failed to install package 'pngcheck'.")
+        else:
+            print("Aborted.")
+            return
+
     try:
         output = subprocess.check_output(['pngcheck', filepath])
         return output.decode()
     except subprocess.CalledProcessError as e:
-        return f"{colors.FAIL}Error: {e.output.decode()}{colors.ENDC}"
+        return f"Error: {e.output.decode()}"
 
 # Function to run stegseek with or without brute force
 def run_stegseek(filepath, brute_force=False):
