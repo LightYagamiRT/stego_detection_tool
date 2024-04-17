@@ -23,7 +23,7 @@ Steganography is the practice of concealing a message, file, image, or video wit
 2. Navigate into the project directory:
 
    ```bash
-   cd stego-detection-tool
+   cd stego_detection_tool
    ```
 
 3. Run the main Python script:
