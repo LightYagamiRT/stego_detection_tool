@@ -16,6 +16,10 @@ class colors:
 # List of required packages
 required_packages = ['steghide', 'exiftool', 'zsteg', 'binwalk', 'foremost', 'pngcheck', 'stegseek']
 
+def check_required_packages():
+    missing_packages = [package for package in required_packages if not is_package_installed(package)]
+    return missing_packages
+
 # Function to check if a package is installed
 def is_package_installed(package):
     try:
@@ -157,6 +161,24 @@ def clear_outputs():
 
 # Main function
 def main():
+    # Check if all required packages are installed
+    missing_packages = check_required_packages()
+
+    if missing_packages:
+        print(f"{colors.FAIL}The following required packages are not installed:")
+        for package in missing_packages:
+            print(f"- {package}")
+        install_all = input("Do you want to install all missing packages? (yes/no): ").lower()
+        if install_all == 'yes':
+            for package in missing_packages:
+                if install_package(package):
+                    print(f"{colors.OKGREEN}Package '{package}' installed successfully.{colors.ENDC}")
+                else:
+                    print(f"{colors.FAIL}Failed to install package '{package}'.{colors.ENDC}")
+        else:
+            print(f"{colors.WARNING}Aborted.{colors.ENDC}")
+            return
+
     print(f"{colors.HEADER}"
 	"""
                       ..:::::::::..
