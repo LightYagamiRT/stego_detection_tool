@@ -17,7 +17,7 @@ Steganography is the practice of concealing a message, file, image, or video wit
 1. Clone this repository to your local machine:
 
    ```bash
-   git clone https://github.com/your_username/stego-detection-tool.git
+   git clone https://github.com/LightYagamiRT/stego-detection-tool.git
    ```
 
 2. Navigate into the project directory:
