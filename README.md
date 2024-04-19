@@ -29,10 +29,12 @@ Steganography is the practice of concealing a message, file, image, or video wit
 3. Run the main Python script:
 
    ```bash
-   python stego_detection_tool.py
+   python stego_detection_tool.py <file_path>
    ```
 
-4. Follow the prompts to select the analysis options and provide the file path you want to analyze.
+   Replace `<file_path>` with the path to the file you want to analyze.
+
+4. Follow the prompts to select the analysis options.
 
 ## Features
 

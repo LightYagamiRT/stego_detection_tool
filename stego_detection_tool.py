@@ -1,6 +1,7 @@
 import subprocess
 import os
 import shutil
+import sys
 
 # Colors
 class colors:
@@ -16,9 +17,6 @@ class colors:
 # List of required packages
 required_packages = ['steghide', 'exiftool', 'zsteg', 'binwalk', 'foremost', 'pngcheck', 'stegseek']
 
-def check_required_packages():
-    missing_packages = [package for package in required_packages if not is_package_installed(package)]
-    return missing_packages
 
 # Function to check if a package is installed
 def is_package_installed(package):
@@ -28,6 +26,11 @@ def is_package_installed(package):
     except subprocess.CalledProcessError:
         return False
 
+# Function to check required packages
+def check_required_packages():
+    missing_packages = [package for package in required_packages if not is_package_installed(package)]
+    return missing_packages
+
 # Function to install a package
 def install_package(package):
     try:
@@ -35,26 +38,6 @@ def install_package(package):
         return True
     except subprocess.CalledProcessError:
         return False
-
-# Function to run strings and grep for potential flags
-def run_strings_and_grep(filepath):
-    if not is_package_installed('strings'):
-        print("Package 'strings' is not installed.")
-        install = input("Do you want to install it? (yes/no): ").lower()
-        if install == 'yes':
-            if install_package('strings'):
-                print("Package 'strings' installed successfully.")
-            else:
-                print("Failed to install package 'strings'.")
-        else:
-            print("Aborted.")
-            return
-    try:
-        strings_output = subprocess.check_output(['strings', filepath])
-        grep_output = subprocess.check_output(['grep', '-i', 'CTF'], input=strings_output)
-        return grep_output.decode()
-    except subprocess.CalledProcessError as e:
-        return f"Error: {e.output.decode()}"
 
 # Function to run strings and grep for potential flags
 def run_strings_and_grep(filepath):
@@ -123,23 +106,11 @@ def run_foremost(filepath):
 
 # Function to run pngcheck
 def run_pngcheck(filepath):
-    if not is_package_installed('pngcheck'):
-        print("Package 'pngcheck' is not installed.")
-        install = input("Do you want to install it? (yes/no): ").lower()
-        if install == 'yes':
-            if install_package('pngcheck'):
-                print("Package 'pngcheck' installed successfully.")
-            else:
-                print("Failed to install package 'pngcheck'.")
-        else:
-            print("Aborted.")
-            return
-
     try:
         output = subprocess.check_output(['pngcheck', filepath])
         return output.decode()
     except subprocess.CalledProcessError as e:
-        return f"Error: {e.output.decode()}"
+        return f"{colors.FAIL}Error: {e.output.decode()}{colors.ENDC}"
 
 # Function to run stegseek with or without brute force
 def run_stegseek(filepath, brute_force=False):
@@ -154,6 +125,9 @@ def run_stegseek(filepath, brute_force=False):
             if "the file format" in error_message:
                 return f"{colors.FAIL}Error: Stegseek does not support this file format.{colors.ENDC}"
             return f"{colors.FAIL}Error: {error_message}{colors.ENDC}"
+    else:
+        #print("\nSkipped Stegseek\n")
+        return f"{colors.FAIL}Skipped Stegseek{colors.ENDC}"
 
 # Function to clear outputs
 def clear_outputs():
@@ -179,8 +153,13 @@ def main():
             print(f"{colors.WARNING}Aborted.{colors.ENDC}")
             return
 
+    if len(sys.argv) == 1:
+        print("Usage: python steg_detect.py <file_path>")
+        return
+
+    filepath = sys.argv[1]
     print(f"{colors.HEADER}"
-	"""
+        """
                       ..:::::::::..
                   ..:::aad8888888baa:::..
               .::::d:?88888888888?::8b::::.
@@ -202,20 +181,12 @@ def main():
               `::::::88::88::88:::88::::::'
                  ``:::::::::::::::::::''
                       ``:::::::::''
-	"""
+        """
 
           f"{colors.ENDC}")
+
     print(f"{colors.BOLD}Welcome to the Steganography Detection Tool!{colors.ENDC}")
-    print(f"{colors.OKBLUE}Listing files in the current directory:{colors.ENDC}")
-    print(subprocess.check_output(['ls']).decode())
-    
-    while True:
-        filepath = input("Enter the path to the file: ")
-        if os.path.exists(filepath):
-            break
-        else:
-            print(f"{colors.FAIL}File not found. Please enter a valid path.{colors.ENDC}")
-    
+
     print("Please select an option:")
     print("0. Run all tools")
     print("1. Run strings and grep")
